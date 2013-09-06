@@ -13,10 +13,10 @@ MOCKUP
 A crude mockup can be found below. I am not good with Markdown.
 
 ________________    
-|\	64F\	|  
-|\	\	|  
-|nine\	\	|  
-|forty\	\	|  
-|nine\	\	|  
-|\	\	|  
-|\	\	|
+|````````64F````|  
+|`````````````` |  
+|nine``````````	|  
+|forty``````````|  
+|nine`````````` |  
+|`````````````` |  
+|`````````````` |
