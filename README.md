@@ -10,13 +10,13 @@ Watchface will be a minimal time display -- preferrably only the current time in
 
 MOCKUP
 ---------------
-A crude mockup can be found below. I am not good with ASCII.
+A crude mockup can be found below. I am not good with Markdown.
 
-`________________`    
-`	64F	|`  
-`|		|`  
-`|nine		|`  
-`|forty		|`  
-`|nine		|`  
-`|		|`  
-`_________________`
+________________    
+|\	64F\	|  
+|\	\	|  
+|nine\	\	|  
+|forty\	\	|  
+|nine\	\	|  
+|\	\	|  
+|\	\	|
