@@ -1,0 +1,9 @@
+A crude UI mockup can be found below. I am not good with ASCII.
+
+================
+|	64f	|
+|		|
+| nine		|
+| forty		|
+| nine		|
+================
