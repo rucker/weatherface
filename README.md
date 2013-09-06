@@ -12,11 +12,11 @@ MOCKUP
 ---------------
 A crude mockup can be found below. I am not good with ASCII.
 
-_________________
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 |	64F	|
 |		|
 |nine		|
 |forty		|
 |nine		|
 |		|
-_________________
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\__
