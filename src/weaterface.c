@@ -12,6 +12,9 @@ PBL_APP_INFO(MY_UUID,
 
 Window window;
 TextLayer layerTime;
+TextLayer layerWeather;
+
+GSize layerWeatherMaxSize;
 
 void handle_init(AppContextRef ctx) {
 
@@ -20,6 +23,15 @@ void handle_init(AppContextRef ctx) {
   window_stack_push(&window, true /* Animated */);
 
   //window_init_current_app(&APP_RESOURCES);
+
+  text_layer_init(&layerWeather, window.layer.frame);
+  text_layer_set_background_color(&layerWeather, GColorClear);
+  text_layer_set_text_color(&layerWeather, GColorWhite);
+  layerWeatherMaxSize = GSize(144, 14);
+  text_layer_set_size(&layerWeather, layerWeatherMaxSize);
+  text_layer_set_text_alignment(&layerWeather, GTextAlignmentRight);
+  text_layer_set_text(&layerWeather, "75");
+  layer_add_child(&window.layer, &layerWeather.layer);
 
   text_layer_init(&layerTime, window.layer.frame);
   text_layer_set_background_color(&layerTime, GColorClear);
