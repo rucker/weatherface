@@ -2,7 +2,7 @@ Weatherface - a Pebble watchface that shows current weather conditions.
 =================
 PURPOSE
 -----------------
-The purpose of this project is essentially to satisfy my own curiosity while learning about the Pebble SDK.
+The purpose of this project is essentially to satisfy my own curiosity while learning about the Pebble SDK while giving myself an excuse to get familiar with Git, Vim, and more.
 
 DESIGN
 ----------------
