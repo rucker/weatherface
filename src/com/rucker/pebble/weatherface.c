@@ -50,6 +50,19 @@ void handle_minute_tick(AppContextRef ctx, PebbleTickEvent *e) {
   text_layer_set_text(&layerTime, timeText);
 }
 
+void my_out_sent_handler(DictionaryIterator *sent, void *context) {
+// outgoing message was delivered
+}
+void my_out_fail_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+// outgoing message failed
+}
+void my_in_rcv_handler(DictionaryIterator *received, void *context) {
+// incoming message received
+}
+void my_in_drp_handler(void *context, AppMessageResult reason) {
+// incoming message dropped
+}
+
 void pbl_main(void *params) {
   PebbleAppHandlers handlers = {
     .init_handler = &handle_init,
@@ -57,6 +70,18 @@ void pbl_main(void *params) {
       .tick_handler = &handle_minute_tick,
       .tick_units = MINUTE_UNIT
     }
+    .messaging_info = {
+	.buffer_sizes = {
+    	.inbound = 64, // inbound buffer size in bytes
+	.outbound = 16, // outbound buffer size in bytes
+    	},
+    },
+    .default_callbacks.callbacks = {
+	.out_sent = my_out_sent_handler,
+	.out_failed = my_out_fail_handler,
+	.in_received = my_in_rcv_handler,
+	.in_dropped = my_in_drp_handler,
+    },
   };
   app_event_loop(params, &handlers);
 }
