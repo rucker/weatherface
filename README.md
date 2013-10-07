@@ -10,7 +10,7 @@ Watchface will include a minimal time display -- probably a re-implementation of
 
 TODO/WISHLIST
 ---------------
-1. Implement textual representation of time, e.g. "nine thirty nine" instead of "9:39."
+1. Implement textual representation of time, e.g. "nine thirty nine" instead of "9:39."  
 	1a. Split up times ending in "teen" gracefully.
 2. Set time correctly at init rather than when first tick is handled.
 3. Implement communication with Android device.
