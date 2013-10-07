@@ -2,6 +2,7 @@ package com.rucker.weatherface.android;
 
 import android.app.Activity;
 import android.os.Bundle;
+import com.rucker.weatherface.android.R;
 
 public class WeatherFaceActivity extends Activity
 {
