@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -20,6 +21,8 @@ import android.view.View;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 /**
  * @see https://github.com/pebble/pebblekit/blob/master/Android/PebbleKitExample/src/com/example/PebbleKitExample/ExampleWeatherActivity.java
@@ -34,18 +37,36 @@ public class MainActivity extends Activity {
     private static final int TEMP_KEY = 1;
     // This UUID identifies the weather app
     private static final UUID WEATHER_UUID = UUID.fromString("E23101B0-F418-4F72-8709-FC90799FEE98");
+    // Tag used for logging
+    private static final String TAG = "Weatherface";
 
     private LocationManager mLocationManager;
+    //ID for requests from this activity.
+    private static final int activityRequestCode = 1;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if (doGooglePlayServicesCheck()) {
+	        setContentView(R.layout.activity_main);
+	        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	        updateWeather(findViewById(R.layout.activity_main));
+        }
     }
 
 
-    @Override
+    private boolean doGooglePlayServicesCheck() {
+    	int playSvcAvail =  GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+		if (playSvcAvail != ConnectionResult.SUCCESS) { 
+			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(playSvcAvail, this, activityRequestCode);
+			errorDialog.show();
+			return false;
+		}
+		return true;
+	}
+
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
@@ -71,7 +92,14 @@ public class MainActivity extends Activity {
             }
         };
 
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+//        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+        for (String provider : mLocationManager.getAllProviders()) {
+        	mLocationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+        	//TODO shouldn't these be enumerated somewhere in the API?
+        	if (provider.equals("gps")) {
+//        		doWeatherUpdate(mLocationManager.getLastKnownLocation(provider));
+        	}
+        }
     }
 
     public void sendWeatherDataToWatch(int weatherIconId, int temperatureCelsius) {
@@ -95,6 +123,8 @@ public class MainActivity extends Activity {
         // using the OpenWeatherMap webservice: http://openweathermap.org/wiki/API/JSON_API
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
+        
+        Log.i(TAG, "Found latitude of " + latitude + " and longitude of " + longitude);
 
         try {
             URL u = new URL(String.format("http://api.openweathermap.org/data/2.1/find/city?lat=%f&lon=%f&cnt=1",
