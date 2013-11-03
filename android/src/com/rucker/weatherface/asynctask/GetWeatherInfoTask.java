@@ -46,6 +46,7 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
                     longitude));
 
             HttpURLConnection urlConnection = (HttpURLConnection) u.openConnection();
+            int temp;
             try {
                 BufferedReader reader =
                         new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -58,14 +59,16 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
                 int wtype = l.getJSONArray("weather").getJSONObject(0).getInt("id");
 
                 int weatherIcon = getIconFromWeatherId(wtype);
-                int temp = (int) (temperature - 273.15);
+                //Convert Kelvin to Fahrenheit
+                temp = (int) (temperature * 9/5 - 459.67);
 
                 sendWeatherDataToWatch(weatherIcon, temp);
             } finally {
                 urlConnection.disconnect();
             }
 
-            Log.d("WeatherActivity", String.format("%f, %f", latitude, longitude));
+            Log.d("WeatherActivity", "Got temperature of " + temp + 
+            		" for location: " +  String.format("%f, %f", latitude, longitude));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
