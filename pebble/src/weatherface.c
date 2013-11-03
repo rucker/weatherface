@@ -16,6 +16,13 @@ TextLayer layerWeather;
 
 GSize layerWeatherMaxSize;
 
+enum {
+  WEATHER_ICON_KEY = 0x0,         // TUPLE_INT
+  WEATHER_TEMPERATURE_KEY = 0x1,  // TUPLE_CSTRING
+  DICT_SIZE = 2			  // Size of dict sent from Android app
+};
+
+
 void handle_init(AppContextRef ctx) {
 
   window_init(&window, "Main");
@@ -30,7 +37,6 @@ void handle_init(AppContextRef ctx) {
   layerWeatherMaxSize = GSize(144, 14);
   text_layer_set_size(&layerWeather, layerWeatherMaxSize);
   text_layer_set_text_alignment(&layerWeather, GTextAlignmentRight);
-  text_layer_set_text(&layerWeather, "75");
   layer_add_child(&window.layer, &layerWeather.layer);
 
   text_layer_init(&layerTime, window.layer.frame);
@@ -57,30 +63,45 @@ void my_out_fail_handler(DictionaryIterator *failed, AppMessageResult reason, vo
 // outgoing message failed
 }
 void my_in_rcv_handler(DictionaryIterator *received, void *context) {
-// incoming message received
+	// incoming message received
+//  text_layer_set_text(&layerWeather, received->dictionary->head[WEATHER_TEMPERATURE_KEY].value);
+  const uint32_t bufferSize = dict_calc_buffer_size(DICT_SIZE);
+  uint8_t buffer[bufferSize];
+  Tuple *tuple = dict_read_begin_from_buffer(received, buffer, DICT_SIZE);
+  while (tuple) {
+    switch (tuple->key) {
+      case WEATHER_ICON_KEY:
+        //TODO weather icons not yet implemented.
+        break;
+      case WEATHER_TEMPERATURE_KEY:
+        text_layer_set_text(&layerWeather, tuple->value->cstring);
+        break;
+    }
+    tuple = dict_read_next(received);
+  }
 }
 void my_in_drp_handler(void *context, AppMessageResult reason) {
 // incoming message dropped
 }
 
 void pbl_main(void *params) {
-  PebbleAppHandlers handlers = {
+  static PebbleAppHandlers handlers = {
     .init_handler = &handle_init,
     .tick_info = {
       .tick_handler = &handle_minute_tick,
       .tick_units = MINUTE_UNIT
-    }
+    },
     .messaging_info = {
 	.buffer_sizes = {
     	.inbound = 64, // inbound buffer size in bytes
 	.outbound = 16, // outbound buffer size in bytes
-    	},
-    },
-    .default_callbacks.callbacks = {
-	.out_sent = my_out_sent_handler,
-	.out_failed = my_out_fail_handler,
-	.in_received = my_in_rcv_handler,
-	.in_dropped = my_in_drp_handler,
+    	}, 
+      .default_callbacks.callbacks = {
+  	  .out_sent = my_out_sent_handler,
+	  .out_failed = my_out_fail_handler,
+	  .in_received = my_in_rcv_handler,
+	  .in_dropped = my_in_drp_handler,
+      },
     },
   };
   app_event_loop(params, &handlers);

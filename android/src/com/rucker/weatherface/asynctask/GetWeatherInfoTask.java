@@ -46,7 +46,6 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
                     longitude));
 
             HttpURLConnection urlConnection = (HttpURLConnection) u.openConnection();
-            int temp;
             try {
                 BufferedReader reader =
                         new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
@@ -60,15 +59,15 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
 
                 int weatherIcon = getIconFromWeatherId(wtype);
                 //Convert Kelvin to Fahrenheit
-                temp = (int) (temperature * 9/5 - 459.67);
+               int temp = (int) (temperature * 9/5 - 459.67);
 
+                Log.d("WeatherActivity", "Got temperature of " + temp + 
+                		" for location: " +  String.format("%f, %f", latitude, longitude));
                 sendWeatherDataToWatch(weatherIcon, temp);
             } finally {
                 urlConnection.disconnect();
             }
 
-            Log.d("WeatherActivity", "Got temperature of " + temp + 
-            		" for location: " +  String.format("%f, %f", latitude, longitude));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -87,11 +86,11 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
         }
     }
 
-    public void sendWeatherDataToWatch(int weatherIconId, int temperatureCelsius) {
+    public void sendWeatherDataToWatch(int weatherIconId, int temp) {
         // Build up a Pebble dictionary containing the weather icon and the current temperature in degrees celsius
         PebbleDictionary data = new PebbleDictionary();
         data.addUint8(ICON_KEY, (byte) weatherIconId);
-        data.addString(TEMP_KEY, String.format("%d\u00B0C", temperatureCelsius));
+        data.addString(TEMP_KEY, String.format("%d\u00B0F", temp));
 
         // Send the assembled dictionary to the weather watch-app; this is a no-op if the app isn't running or is not
         // installed
