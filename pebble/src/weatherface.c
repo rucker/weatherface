@@ -17,9 +17,8 @@ TextLayer layerWeather;
 GSize layerWeatherMaxSize;
 
 enum {
-  WEATHER_ICON_KEY = 0x0,         // TUPLE_INT
-  WEATHER_TEMPERATURE_KEY = 0x1,  // TUPLE_CSTRING
-  DICT_SIZE = 2			  // Size of dict sent from Android app
+  ICON_KEY = 0x0,         // TUPLE_INT
+  TEMP_KEY = 0x1,  // TUPLE_CSTRING
 };
 
 
@@ -29,12 +28,11 @@ void handle_init(AppContextRef ctx) {
   window_set_background_color(&window, GColorBlack);
   window_stack_push(&window, true /* Animated */);
 
-  //window_init_current_app(&APP_RESOURCES);
-
   text_layer_init(&layerWeather, window.layer.frame);
   text_layer_set_background_color(&layerWeather, GColorClear);
   text_layer_set_text_color(&layerWeather, GColorWhite);
-  layerWeatherMaxSize = GSize(144, 14);
+  text_layer_set_font(&layerWeather, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
+  layerWeatherMaxSize = GSize(144, 21);
   text_layer_set_size(&layerWeather, layerWeatherMaxSize);
   text_layer_set_text_alignment(&layerWeather, GTextAlignmentRight);
   layer_add_child(&window.layer, &layerWeather.layer);
@@ -43,7 +41,7 @@ void handle_init(AppContextRef ctx) {
   text_layer_set_background_color(&layerTime, GColorClear);
   text_layer_set_text_color(&layerTime, GColorWhite);
   text_layer_set_font(&layerTime, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
-  //TODO: layer_set_frame here to position the time layer
+  layer_set_frame((Layer *)&layerTime, GRect(0, 22, 144, 146));
   layer_add_child(&window.layer, &layerTime.layer);
 }
 
@@ -63,22 +61,10 @@ void my_out_fail_handler(DictionaryIterator *failed, AppMessageResult reason, vo
 // outgoing message failed
 }
 void my_in_rcv_handler(DictionaryIterator *received, void *context) {
-	// incoming message received
-//  text_layer_set_text(&layerWeather, received->dictionary->head[WEATHER_TEMPERATURE_KEY].value);
-  const uint32_t bufferSize = dict_calc_buffer_size(DICT_SIZE);
-  uint8_t buffer[bufferSize];
-  Tuple *tuple = dict_read_begin_from_buffer(received, buffer, DICT_SIZE);
-  while (tuple) {
-    switch (tuple->key) {
-      case WEATHER_ICON_KEY:
-        //TODO weather icons not yet implemented.
-        break;
-      case WEATHER_TEMPERATURE_KEY:
-        text_layer_set_text(&layerWeather, tuple->value->cstring);
-        break;
-    }
-    tuple = dict_read_next(received);
-  }
+  // incoming message received
+  Tuple *in_tuple = dict_find(received, TEMP_KEY);
+  if (in_tuple)
+    text_layer_set_text(&layerWeather, in_tuple->value->cstring);
 }
 void my_in_drp_handler(void *context, AppMessageResult reason) {
 // incoming message dropped

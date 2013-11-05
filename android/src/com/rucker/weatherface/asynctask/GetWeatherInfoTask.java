@@ -87,7 +87,7 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
     }
 
     public void sendWeatherDataToWatch(int weatherIconId, int temp) {
-        // Build up a Pebble dictionary containing the weather icon and the current temperature in degrees celsius
+        // Build up a Pebble dictionary containing the weather icon and the current temperature in degrees fahrenheit
         PebbleDictionary data = new PebbleDictionary();
         data.addUint8(ICON_KEY, (byte) weatherIconId);
         data.addString(TEMP_KEY, String.format("%d\u00B0F", temp));
