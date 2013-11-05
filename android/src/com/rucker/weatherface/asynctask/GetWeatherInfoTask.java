@@ -4,19 +4,27 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.json.JSONObject;
 
-import android.content.Context;
+import android.app.Activity;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
+import com.rucker.weatherface.android.MainActivity;
 
-public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
+/**
+ * @see https://github.com/pebble/pebblekit/blob/master/Android/PebbleKitExample/src/com/example/PebbleKitExample/ExampleWeatherActivity.java
+ * @author zulak@getpebble.com, Rick Ucker
+ *
+ */
+public class GetWeatherInfoTask extends AsyncTask<Location, Void, HashMap<String, String>> {
 	
     // the tuple key corresponding to the weather icon displayed on the watch
     private static final int ICON_KEY = 0;
@@ -25,18 +33,26 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
     // This UUID identifies the weather app
     private static final UUID WEATHER_UUID = UUID.fromString("E23101B0-F418-4F72-8709-FC90799FEE98");
 	private static final String TAG = "GetWeatherInfoTask";
-	private Context ctx;
+	private Activity caller;
+	private int callerViewId;
 	
-	public GetWeatherInfoTask(Context ctx) {
-		this.ctx = ctx;
+	/**
+	 * 
+	 * @param caller the Activity calling this task.
+	 * @param callerViewId the ID of the TextView to be updated post-execute.
+	 */
+	public GetWeatherInfoTask(Activity caller, int callerViewId) {
+		this.caller = caller;
+		this.callerViewId = callerViewId;
 	}
 	
 	@Override
-	protected Void doInBackground(Location... params) {
-		   // A very sketchy, rough way of getting the local weather forecast from the phone's approximate location
-        // using the OpenWeatherMap webservice: http://openweathermap.org/wiki/API/JSON_API
+	protected HashMap<String, String> doInBackground(Location... params) {
+	   // A very sketchy, rough way of getting the local weather forecast from the phone's approximate location
+       // using the OpenWeatherMap webservice: http://openweathermap.org/wiki/API/JSON_API
         double latitude = params[0].getLatitude();
         double longitude = params[0].getLongitude();
+        HashMap<String, String> results = new HashMap<String, String>();
         
         Log.i(TAG, "Found latitude of " + latitude + " and longitude of " + longitude);
 
@@ -48,18 +64,22 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
             HttpURLConnection urlConnection = (HttpURLConnection) u.openConnection();
             try {
                 BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
+                		new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 String json = reader.readLine();
 
                 JSONObject jsonObject = new JSONObject(json);
                 JSONObject l = jsonObject.getJSONArray("list").getJSONObject(0);
                 JSONObject m = l.getJSONObject("main");
                 double temperature = m.getDouble("temp");
+                String location = l.getString("name");
                 int wtype = l.getJSONArray("weather").getJSONObject(0).getInt("id");
 
                 int weatherIcon = getIconFromWeatherId(wtype);
                 //Convert Kelvin to Fahrenheit
-               int temp = (int) (temperature * 9/5 - 459.67);
+                String temp = String.format("%d\u00B0F", (int) (temperature * 9/5 - 459.67));
+                
+                results.put(MainActivity.KEY_LOCATION_NAME, location);
+                results.put(MainActivity.KEY_TEMP, temp);
 
                 Log.d("WeatherActivity", "Got temperature of " + temp + 
                 		" for location: " +  String.format("%f, %f", latitude, longitude));
@@ -71,7 +91,7 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-		return null;
+		return results;
 	}
 	
     private int getIconFromWeatherId(int weatherId) {
@@ -86,14 +106,20 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, Void> {
         }
     }
 
-    public void sendWeatherDataToWatch(int weatherIconId, int temp) {
+    public void sendWeatherDataToWatch(int weatherIconId, String temp) {
         // Build up a Pebble dictionary containing the weather icon and the current temperature in degrees fahrenheit
         PebbleDictionary data = new PebbleDictionary();
         data.addUint8(ICON_KEY, (byte) weatherIconId);
-        data.addString(TEMP_KEY, String.format("%d\u00B0F", temp));
+        data.addString(TEMP_KEY, temp);
 
         // Send the assembled dictionary to the weather watch-app; this is a no-op if the app isn't running or is not
         // installed
-        PebbleKit.sendDataToPebble(ctx, WEATHER_UUID, data);
+        PebbleKit.sendDataToPebble(caller.getApplicationContext(), WEATHER_UUID, data);
+    }
+    
+    protected void onPostExecute(HashMap<String, String> result) {
+    	TextView tv = (TextView)caller.findViewById(callerViewId);
+    	tv.setText("It looks like you are near " + result.get(MainActivity.KEY_LOCATION_NAME) + ".\n" +
+    			"The current temperature is " + result.get(MainActivity.KEY_TEMP) + ".");
     }
 }

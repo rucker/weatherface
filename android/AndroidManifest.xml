@@ -32,6 +32,4 @@
             </intent-filter>
         </activity>
     </application>
-    <!-- TODO Declare library components, as per https://developer.android.com/tools/projects/projects-eclipse.html#ReferencingLibraryProject -->
-
 </manifest>

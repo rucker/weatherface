@@ -15,11 +15,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.rucker.weatherface.asynctask.GetWeatherInfoTask;
 
-/**
- * @see https://github.com/pebble/pebblekit/blob/master/Android/PebbleKitExample/src/com/example/PebbleKitExample/ExampleWeatherActivity.java
- * @author zulak@getpebble.com, Rick Ucker
- *
- */
 public class MainActivity extends Activity {
 	
     // Tag used for logging
@@ -27,6 +22,8 @@ public class MainActivity extends Activity {
     private LocationManager mLocationManager;
     //ID for requests from this activity.
     private static final int activityRequestCode = 1;
+    public static final String KEY_LOCATION_NAME = "LOCATION";
+    public static final String KEY_TEMP = "TEMP";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +73,9 @@ public class MainActivity extends Activity {
             public void onProviderDisabled(String provider) {
             }
         };
-
-//        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-        for (String provider : mLocationManager.getAllProviders()) {
-        	if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-        		mLocationManager.requestLocationUpdates(provider, 0, 0, locationListener);
-        		doWeatherUpdate(mLocationManager.getLastKnownLocation(provider));
-        	}
-        }
+        String provider = mLocationManager.getProvider(LocationManager.NETWORK_PROVIDER).getName();
+        mLocationManager.requestLocationUpdates(provider, 0, 0, locationListener);
+		doWeatherUpdate(mLocationManager.getLastKnownLocation(provider));
     }
     
     /**
@@ -92,7 +84,7 @@ public class MainActivity extends Activity {
      */
 
     public void doWeatherUpdate(Location location) {
-    	GetWeatherInfoTask gwit = new GetWeatherInfoTask(getApplicationContext());
+    	GetWeatherInfoTask gwit = new GetWeatherInfoTask(this, R.id.greeting);
     	gwit.execute(location);
     }
 }
