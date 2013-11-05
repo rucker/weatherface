@@ -119,6 +119,7 @@ public class GetWeatherInfoTask extends AsyncTask<Location, Void, HashMap<String
     
     protected void onPostExecute(HashMap<String, String> result) {
     	TextView tv = (TextView)caller.findViewById(callerViewId);
+    	//FIXME: Use of constants below produces coupling between this task and the main activity.
     	tv.setText("It looks like you are near " + result.get(MainActivity.KEY_LOCATION_NAME) + ".\n" +
     			"The current temperature is " + result.get(MainActivity.KEY_TEMP) + ".");
     }
