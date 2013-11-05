@@ -13,5 +13,5 @@ TODO/WISHLIST
 1. Set time correctly at init rather than when first tick is handled.
 1. Initialize using last known temperature when watchface is chosen
 1. Implement textual representation of time, e.g. "nine thirty nine" instead of "9:39."
-        3a. Split up times ending in "teen" gracefully..
+        3a. Split up times ending in "teen" gracefully.
 1. Add weather icons.
